@@ -14,8 +14,14 @@ class ProductManager {
             if (file) {
                 products = JSON.parse(file);
             }
-            obj.id = ProductManager.id++;
-            products.push(obj);
+            if(obj.title && obj.description && obj.code && obj.price && obj.thumbnail && obj.stock) {
+                if(products.some(p => p.code === obj.code)) {
+                    console.log("The product already exists");
+                    return;
+                }
+                obj.id = ProductManager.id++;
+                products.push(obj);
+            } else console.log("All fields are required");
             try {
                 await fs.promises.writeFile(this.path, JSON.stringify(products, null, 2));
                 return obj.id;
@@ -73,7 +79,10 @@ class ProductManager {
                 const index = products.findIndex(prod => prod.id === id)
                 if (index !== -1) {
                     for (const prop in obj) {
-                        products[index][prop] = obj[prop];
+                        if(prop !== 'id') {
+                            products[index][prop] = obj[prop];
+                        }
+                        else (console.log('no puede modificarse el id'))
                     }
                 } else {
                     console.log(`No existe un producto con el id: ${id}`);
