@@ -1,45 +1,123 @@
 import { Router } from 'express';
 
-import ProductManager from '../ProductManager.js';
+import { productModel } from '../../models/product.model.js';
 
 const router = Router();
 
-const productManager = new ProductManager('./data/productos.json');
-
 router.get('/', async (req, res) => {
     const limit = req.query.limit;
-    const productos = await productManager.getProducts();
-    if(limit>0 && limit < productos.length) return res.json({status: "success", productos: productos.slice(0,limit)});
-    res.json({status: "success", productos});
+
+    try {
+        const products = await productModel.find().limit(limit);
+        res.status(200).send({
+            status: 200,
+            result: 'success',
+            payload: products
+        });
+    }
+    catch (err) {
+        console.log(`Cannot get products from Mongo: ${err}`)
+        res.status(500).send({
+            status: 500,
+            result: 'error',
+            error: 'Error getting data from DB'
+        });
+    }
 });
 
-router.get('/:pid', async (req, res)=> {
-    const id = parseInt(req.params.pid);
-    let buscado = await productManager.getProductById(id);
-    if(!buscado) return res.status(404).json({status: "error", error: "producto no encontrado"});
-    res.json({status: "success", buscado});
+router.get('/:pid', async (req, res) => {
+    try {
+        const buscado = await productModel.findOne({_id: req.params.pid});
+        if (!buscado) {
+            return res.status(404).send({
+                status: 404,
+                result: "error",
+                error: "Product not found"
+            });
+        }
+    }
+    catch (err) {
+        console.log(`Cannot get product from Mongo: ${err}`);
+        res.status(500).send({
+            status: 500,
+            result: 'error',
+            error: 'Error obtaining data from DB'
+        });
+    }
 });
 
 router.post('/', async (req, res) => {
     const producto = req.body;
-    if(!producto.title || !producto.description || !producto.price || !producto.code || !producto.stock || !producto.category) {
-        return res.status(400).json({status: "error", error: "valores incompletos"});
+    if (!producto.title || !producto.description || !producto.category || !producto.price || !producto.code || !producto.stock) {
+        return res.status(400).send({
+            status: 400,
+            result: 'error',
+            error: "Incomplete values"
+        });
     }
-    const id = await productManager.addProduct(producto);
-    res.json({status: "success", message: `producto con id ${id} creado`});
+    try {
+        const product = await productModel.create(producto);
+        res.status(200).send({
+            status: 200,
+            result: 'success',
+            payload: product
+        });
+    }
+    catch (err) {
+        console.log(`Cannot save product on Mongo: ${err}`);
+        res.status(500).send({
+            status: 500,
+            result: 'error',
+            error: 'Error saving data on DB'
+        });
+    }
 });
 
 router.put('/:pid', async (req, res) => {
     const producto = req.body;
-    let id = parseInt(req.params.pid);
-    const updated = await productManager.updateProduct(id, producto);
-    res.json({status: "success", updated});
+    if (!producto.title || !producto.description || !producto.category || !producto.price || !producto.code || !producto.stock || !req.params.pid) {
+        return res.status(400).json({
+            status: 400,
+            result: 'error',
+            error: "Incomplete values"
+        });
+    }
+
+    try {
+        const updated = await productModel.updateOne({_id: req.params.pid}, producto);
+        res.status(200).send({
+            status: 200,
+            result: 'success',
+            payload: updated
+        });
+    }
+    catch (err) {
+        console.log(`Cannot update product on Mongo: ${err}`);
+        res.status(500).send({
+            status: 500,
+            result: 'error',
+            error: 'Error updating data on DB'
+        });
+    }
 });
 
 router.delete('/:pid', async (req, res) => {
-    let id = parseInt(req.params.pid);
-    const deleted = await productManager.deleteProduct(id);
-    res.json({status: "success", deleted});
-})
+    try {
+        const deleted = await productModel.deleteOne({_id: req.params.pid});
+        res.status(200).send({
+            status: 200,
+            result: 'success',
+            payload: deleted
+        });
+    }
+    catch (err) {
+        console.log(`Cannot delete product on Mongo: ${err}`);
+        res.status(500).send({
+            status: 500,
+            result: 'error',
+            error: 'Error deleting data on DB'
+        });
+    }
+});
 
 export default router;

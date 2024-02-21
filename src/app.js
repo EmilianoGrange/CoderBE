@@ -4,6 +4,8 @@ import handlebars from 'express-handlebars';
 
 import { Server } from 'socket.io';
 
+import mongoose from 'mongoose';
+
 import viewsRouter from './routes/views.router.js';
 
 import productRouter from './routes/products.router.js';
@@ -11,6 +13,8 @@ import productRouter from './routes/products.router.js';
 import cartRouter from './routes/carts.router.js';
 
 const app = express();
+
+mongoose.connect('mongodb://localhost:27017/ecommerce');
 
 app.use(express.json());
 

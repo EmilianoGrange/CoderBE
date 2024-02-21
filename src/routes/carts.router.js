@@ -1,14 +1,10 @@
 import { Router } from 'express';
 
-import CartManager from '../CartManager.js';
+import { cartModel } from '../../models/cart.model.js';
 
-import ProductManager from '../ProductManager.js';
+import { productModel } from '../../models/product.model.js';
 
 const router = Router();
-
-const cartManager = new CartManager('./data/carts.json');
-
-const productManager = new ProductManager('./data/productos.json');
 
 router.post('/', async (req, res) => {
     const id = await cartManager.createCart();
