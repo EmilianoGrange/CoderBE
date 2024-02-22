@@ -1,6 +1,6 @@
 import express from 'express';
 
-import handlebars from 'express-handlebars';
+import { engine } from 'express-handlebars';
 
 import { Server } from 'socket.io';
 
@@ -20,7 +20,7 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-app.engine('handlebars', handlebars.engine());
+app.engine('handlebars', engine());
 app.set('views', 'src/views');
 app.set('view engine', 'handlebars');
 
@@ -31,6 +31,10 @@ app.use('/', viewsRouter);
 app.use('/api/products', productRouter);
 
 app.use('/api/carts', cartRouter);
+
+app.use((req, res, next) => {
+    res.render('404');
+});
 
 const server = app.listen(8080, () => console.log(`Server listening on port ${server.address().port}`));
 

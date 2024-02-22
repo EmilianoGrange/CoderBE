@@ -1,14 +1,14 @@
 import { Router } from 'express';
 
-import { productModel } from '../../models/product.model.js';
+import ProductsDao from '../daos/products.dao.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
-    const limit = req.query.limit;
+    const limit = req.query.limit || 10;
 
     try {
-        const products = await productModel.find().limit(limit);
+        const products = await ProductsDao.getAllProducts(limit);
         res.status(200).send({
             status: 200,
             result: 'success',
@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:pid', async (req, res) => {
     try {
-        const buscado = await productModel.findOne({_id: req.params.pid});
+        const buscado = await ProductsDao.getProductById(req.params.pid);
         if (!buscado) {
             return res.status(404).send({
                 status: 404,
@@ -35,6 +35,11 @@ router.get('/:pid', async (req, res) => {
                 error: "Product not found"
             });
         }
+        res.status(200).send({
+            status: 200,
+            result: 'success',
+            payload: buscado
+        });
     }
     catch (err) {
         console.log(`Cannot get product from Mongo: ${err}`);
@@ -56,7 +61,7 @@ router.post('/', async (req, res) => {
         });
     }
     try {
-        const product = await productModel.create(producto);
+        const product = await ProductsDao.addProduct(producto);
         res.status(200).send({
             status: 200,
             result: 'success',
@@ -84,7 +89,7 @@ router.put('/:pid', async (req, res) => {
     }
 
     try {
-        const updated = await productModel.updateOne({_id: req.params.pid}, producto);
+        const updated = await ProductsDao.updateProduct(req.params.pid, producto);
         res.status(200).send({
             status: 200,
             result: 'success',
@@ -103,7 +108,7 @@ router.put('/:pid', async (req, res) => {
 
 router.delete('/:pid', async (req, res) => {
     try {
-        const deleted = await productModel.deleteOne({_id: req.params.pid});
+        const deleted = await ProductsDao.removeProduct({_id: req.params.pid});
         res.status(200).send({
             status: 200,
             result: 'success',
