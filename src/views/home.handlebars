@@ -15,7 +15,7 @@
         <tbody>
             {{#each products}}
             <tr>
-                <td>{{this.title}}</td>
+                <td><a href="/products/{{this._id}}">{{this.title}}</a></td>
                 <td>{{this.description}}</td>
                 <td>{{this.price}}</td>
                 <td>{{this.code}}</td>

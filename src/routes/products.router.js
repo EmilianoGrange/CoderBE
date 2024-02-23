@@ -1,14 +1,13 @@
 import { Router } from 'express';
 
-import ProductsDao from '../daos/products.dao.js';
+import ProductsDAO from '../daos/products.dao.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
-    const limit = req.query.limit || 10;
 
     try {
-        const products = await ProductsDao.getAllProducts(limit);
+        const products = await ProductsDAO.getAllProducts(req.query.limit);
         res.status(200).send({
             status: 200,
             result: 'success',
@@ -27,7 +26,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:pid', async (req, res) => {
     try {
-        const buscado = await ProductsDao.getProductById(req.params.pid);
+        const buscado = await ProductsDAO.getProductById(req.params.pid);
         if (!buscado) {
             return res.status(404).send({
                 status: 404,
@@ -61,11 +60,11 @@ router.post('/', async (req, res) => {
         });
     }
     try {
-        const product = await ProductsDao.addProduct(producto);
+        const addedProduct = await ProductsDAO.addProduct(...producto);
         res.status(200).send({
             status: 200,
             result: 'success',
-            payload: product
+            payload: addedProduct
         });
     }
     catch (err) {
@@ -89,7 +88,7 @@ router.put('/:pid', async (req, res) => {
     }
 
     try {
-        const updated = await ProductsDao.updateProduct(req.params.pid, producto);
+        const updated = await ProductsDAO.updateProduct(req.params.pid, producto);
         res.status(200).send({
             status: 200,
             result: 'success',
@@ -108,7 +107,7 @@ router.put('/:pid', async (req, res) => {
 
 router.delete('/:pid', async (req, res) => {
     try {
-        const deleted = await ProductsDao.removeProduct({_id: req.params.pid});
+        const deleted = await ProductsDAO.removeProduct({_id: req.params.pid});
         res.status(200).send({
             status: 200,
             result: 'success',

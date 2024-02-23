@@ -1,16 +1,17 @@
 import { productModel } from '../../models/product.model.js';
 
-export default class ProductsDao {
+export default class ProductsDAO {
 
     static async getAllProducts(limit) {
-        return productModel.find().limit(limit).lean();
+        return productModel.paginate({}, {limit: limit || 10, lean: true, page: 1});
     }
 
     static async getProductById(id) {
         return productModel.findOne({_id: id}).lean();
     }
 
-    static async addProduct({title, description, category, price, code, stock, thumbnail}) {
+    static async addProduct(title, description, category, price, code, stock, image) {
+        let thumbnail = [image];
         let status = true;
         return new productModel({ title, description, category, price, code, stock, thumbnail, status}).save();
     }
